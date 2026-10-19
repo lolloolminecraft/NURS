@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "ps4-1400",
+      "title": "PS4 14.00",
+      "subtitle": "Джейлбрейк · отслеживание",
+      "symbol": "gamecontroller.fill",
+      "kind": "ps4",
+      "url": null
+    }
+  ]
+}
