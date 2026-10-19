@@ -75,9 +75,8 @@ struct NMLiveHome: View {
                 NMSettings()
             }
             .task {
-                async let load: Void = reload()
-                async let projectRefresh: Void = store.refresh()
-                _ = await (load, projectRefresh)
+                await reload()
+                await store.refresh()
             }
             .onChange(of: phase) { value in
                 if value == .active {
