@@ -163,7 +163,17 @@ enum NMBackgroundMonitor {
 
 @MainActor
 final class NMStore: ObservableObject {
-    @Published var projects: [NMProject] = [.ps4]
+    @Published var projects: [NMProject] = {
+        guard let data = UserDefaults.standard.data(forKey: "nm.projects.cache"),
+              let feed = try? JSONDecoder().decode(NMProjectFeed.self, from: data) else {
+            return [.ps4]
+        }
+        let extra = feed.projects.filter { item in
+            item.id != NMProject.ps4.id && item.kind == "web"
+                && URL(string: item.url ?? "")?.scheme == "https"
+        }
+        return [.ps4] + extra
+    }()
     @Published var status: NMStatus? = NMStatusCache.load()
     @Published var history: [NMHistoryEntry] = NMStatusCache.history()
     @Published var isLoading = false
