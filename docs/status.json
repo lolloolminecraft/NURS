@@ -4,5 +4,27 @@
   "detected_at": null,
   "submitted_at": null,
   "notification": "not_sent",
-  "last_checked_at": null
+  "last_checked_at": "2026-10-19T10:07:30.828Z",
+  "status_text": "Не найден официально",
+  "summary": "По проверенным первоисточникам рабочий общедоступный джейлбрейк именно для PS4 14.00 пока не подтверждён. Публикации для 13.52 и просьбы о поддержке 14.00 не являются релизом.",
+  "significance": "none",
+  "status_changed_at": "2026-10-19T10:07:30.828Z",
+  "checked_sources": [
+    {
+      "name": "GoldHEN — релизы",
+      "url": "https://github.com/GoldHEN/GoldHEN/releases"
+    },
+    {
+      "name": "GoldHEN — обсуждение 14.00",
+      "url": "https://github.com/GoldHEN/GoldHEN/issues/400"
+    },
+    {
+      "name": "Al-Azif — обсуждение 14.00",
+      "url": "https://github.com/Al-Azif/ps4-exploit-host/issues/224"
+    },
+    {
+      "name": "Обзор проверенных прошивок 13.02–13.52",
+      "url": "https://github.com/caziques/PS4"
+    }
+  ]
 }
