@@ -23,7 +23,7 @@ struct NMProject: Codable, Hashable, Identifiable {
     )
 }
 
-struct NMProjectFeed: Decodable {
+struct NMProjectFeed: Codable {
     let projects: [NMProject]
 }
 
@@ -224,8 +224,12 @@ final class NMStore: ObservableObject {
                 }
             }
             self.projects = projects
+            if let data = try? JSONEncoder().encode(response) {
+                UserDefaults.standard.set(data, forKey: "nm.projects.cache")
+            }
         } catch {
-            self.projects = [.ps4]
+            // Keep the last successfully loaded project list when offline.
+            if self.projects.isEmpty { self.projects = [.ps4] }
         }
     }
 
