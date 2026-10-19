@@ -4,27 +4,51 @@
   "detected_at": null,
   "submitted_at": null,
   "notification": "not_sent",
-  "last_checked_at": "2026-10-19T10:07:30.828Z",
+  "last_checked_at": "2026-10-19T10:36:30.855Z",
   "status_text": "Не найден официально",
   "summary": "По проверенным первоисточникам рабочий общедоступный джейлбрейк именно для PS4 14.00 пока не подтверждён. Публикации для 13.52 и просьбы о поддержке 14.00 не являются релизом.",
   "significance": "none",
   "status_changed_at": "2026-10-19T10:07:30.828Z",
   "checked_sources": [
     {
-      "name": "GoldHEN — релизы",
+      "name": "GoldHEN Releases",
       "url": "https://github.com/GoldHEN/GoldHEN/releases"
     },
     {
-      "name": "GoldHEN — обсуждение 14.00",
+      "name": "Al-Azif Releases",
+      "url": "https://github.com/Al-Azif/ps4-exploit-host/releases"
+    },
+    {
+      "name": "GoldHEN issue 400",
       "url": "https://github.com/GoldHEN/GoldHEN/issues/400"
     },
     {
-      "name": "Al-Azif — обсуждение 14.00",
+      "name": "Al-Azif issue 224",
       "url": "https://github.com/Al-Azif/ps4-exploit-host/issues/224"
     },
     {
-      "name": "Обзор проверенных прошивок 13.02–13.52",
-      "url": "https://github.com/caziques/PS4"
+      "name": "Gezine profile",
+      "url": "https://github.com/Gezine"
+    },
+    {
+      "name": "Gezine Gists",
+      "url": "https://gist.github.com/Gezine"
+    },
+    {
+      "name": "ConsoleMods PS4 guide",
+      "url": "https://consolemods.org/wiki/Ps4_getting_started"
+    },
+    {
+      "name": "ConsoleMods chart",
+      "url": "https://consolemods.org/wiki/PS4:Exploit_Chart"
+    },
+    {
+      "name": "GBAtemp PS4 guide",
+      "url": "https://gbatemp.net/threads/ps4-exploit-guide.497858/page-683"
+    },
+    {
+      "name": "Wololo PS4 news",
+      "url": "https://wololo.net/category/ps4/"
     }
   ]
 }
