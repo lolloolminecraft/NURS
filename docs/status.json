@@ -4,7 +4,7 @@
   "detected_at": null,
   "submitted_at": null,
   "notification": "not_sent",
-  "last_checked_at": "2026-10-19T10:36:30.855Z",
+  "last_checked_at": "2026-10-19T11:30:05.732Z",
   "status_text": "Не найден официально",
   "summary": "По проверенным первоисточникам рабочий общедоступный джейлбрейк именно для PS4 14.00 пока не подтверждён. Публикации для 13.52 и просьбы о поддержке 14.00 не являются релизом.",
   "significance": "none",
@@ -35,20 +35,32 @@
       "url": "https://gist.github.com/Gezine"
     },
     {
-      "name": "ConsoleMods PS4 guide",
-      "url": "https://consolemods.org/wiki/Ps4_getting_started"
-    },
-    {
-      "name": "ConsoleMods chart",
+      "name": "ConsoleMods PS4 exploit chart",
       "url": "https://consolemods.org/wiki/PS4:Exploit_Chart"
     },
     {
-      "name": "GBAtemp PS4 guide",
-      "url": "https://gbatemp.net/threads/ps4-exploit-guide.497858/page-683"
+      "name": "ConsoleMods PS4 getting started",
+      "url": "https://consolemods.org/wiki/Ps4_getting_started"
     },
     {
       "name": "Wololo PS4 news",
       "url": "https://wololo.net/category/ps4/"
+    },
+    {
+      "name": "GBAtemp PS4 exploit guide",
+      "url": "https://gbatemp.net/threads/ps4-exploit-guide.497858/page-683"
+    },
+    {
+      "name": "PSX-Place 13.50 discussion",
+      "url": "https://psx-place.com/threads/system-software-13-50-can-i-mod-jailbreak-my-ps4.50746/"
+    },
+    {
+      "name": "PS4 14.00 research repository",
+      "url": "https://github.com/adri22235/ps4-suid-scanner/blob/main/README.md"
+    },
+    {
+      "name": "PS4 14.00 testkit video",
+      "url": "https://www.youtube.com/watch?v=83jCmyOllHQ"
     }
   ]
 }
