@@ -220,10 +220,10 @@ struct NursModeApp: App {
 struct NMHome: View {
     @EnvironmentObject private var store: NMStore
     @Environment(\.scenePhase) private var scenePhase
-    @State private var selection: NMProject?
+    @State private var path: [NMProject] = []
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     NMHeader()
@@ -236,9 +236,7 @@ struct NMHome: View {
                             .foregroundStyle(.secondary)
                     }
                     ForEach(store.projects) { project in
-                        Button {
-                            selection = project
-                        } label: {
+                        NavigationLink(value: project) {
                             NMProjectTile(project: project, store: store)
                         }
                         .buttonStyle(.plain)
@@ -271,7 +269,7 @@ struct NMHome: View {
                     }
                 }
             }
-            .navigationDestination(item: $selection) { project in
+            .navigationDestination(for: NMProject.self) { project in
                 if project.kind == "ps4" {
                     NMPS4Detail()
                 } else if let link = project.url, let url = URL(string: link) {
@@ -285,7 +283,7 @@ struct NMHome: View {
                 if newPhase == .active { Task { await store.refresh() } }
             }
             .onReceive(NotificationCenter.default.publisher(for: .nmOpenPS4)) { _ in
-                selection = .ps4
+                path = [.ps4]
             }
         }
         .tint(.indigo)
