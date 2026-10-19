@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NURS — PS4 14.00</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+body{background:#0b1018;color:#eaf0fb;margin:0;padding:24px}
+main{max-width:760px;margin:36px auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+h1{font-size:32px;letter-spacing:.14em}
+.tag{color:#8badef}
+section{background:#141d2b;border:1px solid #28364b;border-radius:16px;padding:24px;margin:20px 0}
+.lead{font-size:21px;font-weight:700}
+p{line-height:1.65}
+a{color:#94b8ff;overflow-wrap:anywhere}
+.muted,small{color:#9ba8bc}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;line-height:1.6}
+</style>
+</head>
+<body><main>
+<header><h1>NURS</h1><span class="tag">PS4 • 14.00</span></header>
+<section>
+<p id="status" class="lead">Загрузка статуса…</p>
+<p id="summary"></p>
+<p id="checked" class="muted"></p>
+</section>
+<section id="release" hidden>
+<h2 id="title"></h2>
+<p>Оригинальный источник: <a id="source" target="_blank" rel="noopener noreferrer"></a></p>
+<p>Скачать: <a id="download" target="_blank" rel="noopener noreferrer"></a></p>
+<p>Видео: <span id="video"></span></p>
+<h3>Инструкция от разработчика</h3>
+<pre id="instructions"></pre>
+<p id="detected" class="muted"></p>
+<p id="sent" class="muted"></p>
+</section>
+<p><small>Время показано в часовом поясе устройства. Ссылки на файлы и инструкции появляются только после подтверждения релиза. Файлы следует проверять у первоисточника.</small></p>
+</main>
+<script>
+const el=id=>document.getElementById(id);
+const when=value=>value?new Date(value).toLocaleString('ru-RU',{dateStyle:'medium',timeStyle:'medium'}):'нет данных';
+function link(id,url){if(!/^https:\/\//.test(url||'')){el(id).textContent='не опубликовано';return}el(id).href=url;el(id).textContent=url}
+fetch('status.json?time='+Date.now(),{cache:'no-store'}).then(response=>{if(!response.ok)throw Error();return response.json()}).then(state=>{
+  el('checked').textContent='Последняя проверка GitHub Releases: '+when(state.last_checked_at);
+  if(state.state!=='released'||!state.release){
+    el('status').textContent=state.state==='candidate'?'Есть кандидат — ожидаем подтверждения':'Готовый джейлбрейк не подтверждён';
+    el('summary').textContent='NURS проверяет известные источники. Кандидаты не являются готовым релизом и не запускают WhatsApp-уведомление.';
+    return;
+  }
+  const r=state.release;
+  el('release').hidden=false;
+  el('status').textContent='PS4 14.00 — релиз подтверждён';
+  el('summary').textContent='Проверь инструкцию автора, версию прошивки и источник скачивания.';
+  el('title').textContent=r.title||'PS4 14.00';
+  link('source',r.source_url);link('download',r.download_url);
+  el('instructions').textContent=r.instructions||'Инструкция не опубликована.';
+  if(r.video_url&&/^https:\/\//.test(r.video_url)){
+    const a=document.createElement('a');a.href=r.video_url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=r.video_url;el('video').append(a);
+  }else el('video').textContent='Подтверждённого видео нет';
+  el('detected').textContent='Обнаружено: '+when(state.detected_at);
+  el('sent').textContent=state.submitted_at?'Принято WhatsApp API: '+when(state.submitted_at):'WhatsApp: '+(state.notification||'ожидается');
+}).catch(()=>{
+  el('status').textContent='Не удалось загрузить статус';
+  el('summary').textContent='Попробуй открыть страницу позднее.';
+});
+</script>
+</body></html>
