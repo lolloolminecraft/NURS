@@ -12,6 +12,7 @@ targets:
     platform: iOS
     sources:
       - path: NursMode/NursModeApp.swift
+      - path: NursMode/NMAppIntents.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nursmode.iphone
