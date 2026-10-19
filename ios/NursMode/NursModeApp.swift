@@ -3,6 +3,7 @@ import UserNotifications
 import WebKit
 import AVKit
 import BackgroundTasks
+import AppIntents
 
 struct NMProject: Codable, Hashable, Identifiable {
     let id: String
@@ -152,6 +153,7 @@ enum NMBackgroundMonitor {
             if NMStatusCache.remember(fresh) {
                 await NMStatusCache.notify(fresh)
             }
+            UserDefaults.standard.set(ISO8601DateFormatter().string(from: Date()), forKey: "nm.lastBackgroundChecked")
             return true
         } catch {
             return false
@@ -312,6 +314,10 @@ extension Notification.Name {
 struct NursModeApp: App {
     @UIApplicationDelegateAdaptor(NMNotificationDelegate.self) private var delegate
     @StateObject private var store = NMStore()
+
+    init() {
+        NMAppShortcuts.updateAppShortcutParameters()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -751,6 +757,7 @@ struct NMWebProject: UIViewRepresentable {
 struct NMSettings: View {
     @EnvironmentObject private var store: NMStore
     @State private var granted = false
+    @AppStorage("nm.lastBackgroundChecked") private var lastBackgroundChecked = ""
 
     var body: some View {
         Form {
@@ -775,6 +782,14 @@ struct NMSettings: View {
                         ? "Разрешена системой" : "Отключена или ограничена"
                 )
                 Text("NM просит iOS проверять статус в фоне. iPhone сам выбирает время: точный интервал и уведомление сразу после изменения гарантировать нельзя.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Section("Проверка через Команды") {
+                Text("В приложении «Команды» добавь действие Nurs-Mode → «Проверить PS4 14.00». Его можно запускать по расписанию без открытия NM.")
+                    .font(.footnote)
+                LabeledContent("Последний фоновый запуск", value: NMDate.format(lastBackgroundChecked))
+                Text("Прежде чем проверять расписание, открой NM и разреши локальные уведомления. iOS может ограничивать автоматизации на заблокированном телефоне.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
