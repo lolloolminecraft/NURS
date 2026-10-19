@@ -13,6 +13,7 @@ targets:
     sources:
       - path: NursMode/NursModeApp.swift
       - path: NursMode/NMAppIntents.swift
+      - path: NursMode/NMLiveHome.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nursmode.iphone
