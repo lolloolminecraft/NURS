@@ -52,7 +52,7 @@ video,iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:13px;background
 "use strict";
 const ROOT="https://raw.githubusercontent.com/lolloolminecraft/NURS/main/docs/";
 const $=id=>document.getElementById(id);
-let ps4=null, projects=null,lastFetch=0,active="home";
+let ps4=window.NM_BOOT_STATUS||null, projects=window.NM_BOOT_PROJECTS||null,lastFetch=0,active="home";
 const safe=str=>String(str??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function safeURL(url){try{const x=new URL(url);return x.protocol==="https:"?x.href:null}catch(_){return null}}
 function date(x){if(!x)return"Проверка ещё не записана";const d=new Date(x);return isNaN(d.getTime())?String(x):d.toLocaleString("ru-RU",{dateStyle:"medium",timeStyle:"short"})}
@@ -103,7 +103,7 @@ async function nmRefresh(force=false){if(!force && Date.now()-lastFetch<60000)re
 }
 window.nmRefresh=nmRefresh;
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)nmRefresh(true)});
-nmRefresh(true);
+renderProjects();renderPS4();nmRefresh(true);
 setInterval(()=>{if(!document.hidden)nmRefresh(true)},5*60*1000);
 </script>
 </body>
