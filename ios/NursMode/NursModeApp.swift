@@ -2,6 +2,7 @@ import SwiftUI
 import UserNotifications
 import WebKit
 import AVKit
+import BackgroundTasks
 
 struct NMProject: Codable, Hashable, Identifiable {
     let id: String
@@ -25,13 +26,13 @@ struct NMProjectFeed: Decodable {
     let projects: [NMProject]
 }
 
-struct NMSource: Decodable, Identifiable {
+struct NMSource: Codable, Identifiable {
     let name: String
     let url: String
     var id: String { url }
 }
 
-struct NMRelease: Decodable {
+struct NMRelease: Codable {
     let id: String?
     let title: String?
     let source: String?
@@ -42,7 +43,7 @@ struct NMRelease: Decodable {
     let published_at: String?
 }
 
-struct NMStatus: Decodable {
+struct NMStatus: Codable {
     let state: String
     let status_text: String?
     let summary: String?
@@ -70,10 +71,99 @@ enum NMNet {
     }
 }
 
+
+struct NMHistoryEntry: Codable, Identifiable {
+    let id: String
+    let title: String
+    let detectedAt: String
+    let summary: String
+}
+
+enum NMStatusCache {
+    private static let snapshotKey = "nm.snapshot"
+    private static let historyKey = "nm.history"
+    private static let milestoneKey = "nm.milestone"
+
+    static func load() -> NMStatus? {
+        guard let data = UserDefaults.standard.data(forKey: snapshotKey) else { return nil }
+        return try? JSONDecoder().decode(NMStatus.self, from: data)
+    }
+
+    static func history() -> [NMHistoryEntry] {
+        guard let data = UserDefaults.standard.data(forKey: historyKey) else { return [] }
+        return (try? JSONDecoder().decode([NMHistoryEntry].self, from: data)) ?? []
+    }
+
+    static func remember(_ current: NMStatus) -> Bool {
+        let defaults = UserDefaults.standard
+        let previous = defaults.string(forKey: milestoneKey)
+        let milestone = (current.status_changed_at ?? "") + ":" + current.state
+        if let data = try? JSONEncoder().encode(current) {
+            defaults.set(data, forKey: snapshotKey)
+        }
+        guard previous != milestone else { return false }
+        defaults.set(milestone, forKey: milestoneKey)
+        guard previous != nil else { return false }
+        var entries = history()
+        entries.insert(
+            NMHistoryEntry(
+                id: milestone,
+                title: current.status_text ?? "Важное изменение PS4 14.00",
+                detectedAt: current.status_changed_at ?? ISO8601DateFormatter().string(from: Date()),
+                summary: current.summary ?? ""
+            ),
+            at: 0
+        )
+        if let data = try? JSONEncoder().encode(Array(entries.prefix(30))) {
+            defaults.set(data, forKey: historyKey)
+        }
+        return true
+    }
+
+    static func notify(_ status: NMStatus) async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        guard settings.authorizationStatus == .authorized else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "Nurs-Mode · PS4 14.00"
+        content.body = status.status_text ?? "Важное изменение PS4 14.00"
+        content.sound = .default
+        content.userInfo = ["project": "ps4"]
+        let request = UNNotificationRequest(
+            identifier: "nm-status-" + (status.status_changed_at ?? status.state),
+            content: content,
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        )
+        try? await UNUserNotificationCenter.current().add(request)
+    }
+}
+
+enum NMBackgroundMonitor {
+    static let taskID = "com.nursmode.iphone.refresh"
+
+    static func schedule() {
+        let request = BGAppRefreshTaskRequest(identifier: taskID)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 20 * 60)
+        try? BGTaskScheduler.shared.submit(request)
+    }
+
+    static func check() async -> Bool {
+        do {
+            let fresh = try await NMNet.load("status.json", as: NMStatus.self)
+            if NMStatusCache.remember(fresh) {
+                await NMStatusCache.notify(fresh)
+            }
+            return true
+        } catch {
+            return false
+        }
+    }
+}
+
 @MainActor
 final class NMStore: ObservableObject {
     @Published var projects: [NMProject] = [.ps4]
-    @Published var status: NMStatus?
+    @Published var status: NMStatus? = NMStatusCache.load()
+    @Published var history: [NMHistoryEntry] = NMStatusCache.history()
     @Published var isLoading = false
     @Published var networkError: String?
     @Published var importantChange: String?
@@ -105,20 +195,14 @@ final class NMStore: ObservableObject {
         defer { isLoading = false }
         do {
             let updated = try await NMNet.load("status.json", as: NMStatus.self)
-            let oldMilestone = UserDefaults.standard.string(forKey: "nm.milestone")
-            let milestone = (updated.status_changed_at ?? "") + ":" + updated.state
+            let changed = NMStatusCache.remember(updated)
             status = updated
+            history = NMStatusCache.history()
             networkError = nil
 
-            if oldMilestone == nil {
-                UserDefaults.standard.set(milestone, forKey: "nm.milestone")
-            } else if oldMilestone != milestone {
-                UserDefaults.standard.set(milestone, forKey: "nm.milestone")
+            if changed {
                 importantChange = updated.status_text ?? "Важное изменение PS4 14.00"
-                await scheduleLocalNotice(
-                    title: "Nurs-Mode · PS4 14.00",
-                    message: updated.status_text ?? "Статус проекта изменился"
-                )
+                await NMStatusCache.notify(updated)
             }
         } catch {
             networkError = "Не удалось обновить статус. Попробуй позже."
