@@ -259,7 +259,27 @@ final class NMNotificationDelegate: NSObject, UIApplicationDelegate, UNUserNotif
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: NMBackgroundMonitor.taskID,
+            using: nil
+        ) { task in
+            guard let refresh = task as? BGAppRefreshTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleRefresh(refresh)
+        }
+        NMBackgroundMonitor.schedule()
         return true
+    }
+
+    private func handleRefresh(_ task: BGAppRefreshTask) {
+        NMBackgroundMonitor.schedule()
+        let work = Task {
+            let result = await NMBackgroundMonitor.check()
+            task.setTaskCompleted(success: result)
+        }
+        task.expirationHandler = { work.cancel() }
     }
 
     func userNotificationCenter(
@@ -365,6 +385,7 @@ struct NMHome: View {
             .task { await store.refresh() }
             .onChange(of: scenePhase) { newPhase in
                 if newPhase == .active { Task { await store.refresh() } }
+                if newPhase == .background { NMBackgroundMonitor.schedule() }
             }
             .onReceive(NotificationCenter.default.publisher(for: .nmOpenPS4)) { _ in
                 path = [.ps4]
@@ -534,6 +555,21 @@ struct NMPS4Detail: View {
                         Text("Статус обновлён: " + NMDate.format(changed))
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                    }
+                    if !store.history.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("История важных изменений").font(.headline)
+                            ForEach(store.history) { item in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(item.title).font(.subheadline.bold())
+                                    Text(NMDate.format(item.detectedAt))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text(item.summary).font(.footnote)
+                                }
+                            }
+                        }
+                        .nmCard()
                     }
                 }
 
@@ -729,6 +765,16 @@ struct NMSettings: View {
                     }
                 }
                 Text("Удалённые push при закрытом приложении требуют Apple Push Notifications и подходящей подписи. Бесплатная установка через Sideloadly не включает этот канал автоматически.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Section("Фоновая проверка") {
+                LabeledContent(
+                    "Состояние",
+                    value: UIApplication.shared.backgroundRefreshStatus == .available
+                        ? "Разрешена системой" : "Отключена или ограничена"
+                )
+                Text("NM просит iOS проверять статус в фоне. iPhone сам выбирает время: точный интервал и уведомление сразу после изменения гарантировать нельзя.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
