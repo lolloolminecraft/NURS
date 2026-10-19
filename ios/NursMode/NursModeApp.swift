@@ -321,7 +321,7 @@ struct NursModeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NMHome()
+            NMRoot()
                 .environmentObject(store)
         }
     }
@@ -758,6 +758,7 @@ struct NMSettings: View {
     @EnvironmentObject private var store: NMStore
     @State private var granted = false
     @AppStorage("nm.lastBackgroundChecked") private var lastBackgroundChecked = ""
+    @AppStorage("nm.useLiveInterface") private var useLiveInterface = true
 
     var body: some View {
         Form {
@@ -794,6 +795,10 @@ struct NMSettings: View {
                     .foregroundStyle(.secondary)
             }
             Section("Обновление") {
+                Toggle("NM Live — обновлять интерфейс без IPA", isOn: $useLiveInterface)
+                Text("Новые экраны и веб-проекты загружаются из GitHub. Если нет интернета, откроется сохранённая версия. Системные возможности iPhone по-прежнему требуют новой подписанной сборки.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                 Button("Обновить проекты и новости") {
                     Task { await store.refresh() }
                 }
@@ -803,7 +808,7 @@ struct NMSettings: View {
             }
             Section("Приложение") {
                 LabeledContent("Название", value: "Nurs-Mode")
-                LabeledContent("Версия", value: "1.0")
+                LabeledContent("Версия", value: "1.2 Live")
                 Text("Новые нативные функции iPhone потребуют новой сборки IPA.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
