@@ -176,7 +176,29 @@ struct NMLiveWebView: UIViewRepresentable {
 
     private func load(_ markup: String, into browser: WKWebView, coordinator: Coordinator) {
         coordinator.lastHTML = markup
-        browser.loadHTMLString(markup, baseURL: URL(string: NMNet.base + "/"))
+
+        // Let Live show the last verified status even if the device is offline.
+        // The UI's normal fetch still overrides these values when online.
+        var initial = ""
+        if let status = NMStatusCache.load(),
+           let statusData = try? JSONEncoder().encode(status) {
+            initial += bootstrapScript(name: "NM_BOOT_STATUS", data: statusData)
+        }
+        if let projectsData = UserDefaults.standard.data(forKey: "nm.projects.cache") {
+            initial += bootstrapScript(name: "NM_BOOT_PROJECTS", data: projectsData)
+        }
+
+        let entry = "<script>\n\"use strict\";"
+        let assembled = markup.replacingOccurrences(of: entry, with: initial + entry)
+        browser.loadHTMLString(assembled, baseURL: URL(string: NMNet.base + "/"))
+    }
+
+    private func bootstrapScript(name: String, data: Data) -> String {
+        // Base64 keeps arbitrary UTF-8 content out of HTML source syntax.
+        let bytes = data.base64EncodedString()
+        return "<script>window." + name +
+            " = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob('" +
+            bytes + "'), c => c.charCodeAt(0))));</script>\n"
     }
 
     final class Coordinator: NSObject, WKNavigationDelegate {
