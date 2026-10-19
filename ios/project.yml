@@ -16,7 +16,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nursmode.iphone
         PRODUCT_NAME: NursMode
-        GENERATE_INFOPLIST_FILE: YES
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: NursMode/Info.plist
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_CFBundleDisplayName: "Nurs-Mode"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
