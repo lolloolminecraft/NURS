@@ -1,0 +1,25 @@
+workflows:
+  opora-ios:
+    name: Opora IPA for Sideloadly
+    max_build_duration: 45
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+    scripts:
+      - name: Install XcodeGen
+        script: brew install xcodegen
+      - name: Generate project
+        script: |
+          cd ios
+          xcodegen generate
+      - name: Build iPhone application
+        script: |
+          xcodebuild -project ios/Opora.xcodeproj -scheme Opora -configuration Release -sdk iphoneos -derivedDataPath "$CM_BUILD_DIR/ios-build" CODE_SIGNING_ALLOWED=NO build
+      - name: Make unsigned IPA
+        script: |
+          mkdir -p "$CM_BUILD_DIR/package/Payload"
+          cp -R "$CM_BUILD_DIR/ios-build/Build/Products/Release-iphoneos/Opora.app" "$CM_BUILD_DIR/package/Payload/"
+          cd "$CM_BUILD_DIR/package"
+          zip -qry "$CM_BUILD_DIR/Opora.ipa" Payload
+    artifacts:
+      - Opora.ipa
